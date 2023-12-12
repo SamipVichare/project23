@@ -1,21 +1,30 @@
 {
+  "name": "finalproject",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "Start": "node app.js"
+  },
+  "author": "Samip Vichare",
+  "license": "ISC",
   "dependencies": {
+    "@handlebars/allow-prototype-access": "^1.0.5",
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
-    "custom": "^0.0.0",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-handlebars": "^7.1.2",
-    "express-validator": "^7.0.1",
-    "helper": "^0.0.13",
-    "moment": "^2.29.4",
-    "mongoose": "^8.0.1"
-  },
-  "name": "asn4-mongo-samip",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Samip",
-  "license": "ISC",
-  "description": ""
+    "express-session": "^1.17.3",
+    "handlebars": "^4.7.8",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^8.0.0"
+  }
 }

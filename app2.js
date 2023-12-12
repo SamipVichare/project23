@@ -1,132 +1,72 @@
-/******************************************************************************
-***
-*	ITE5315 – Assignment 4
-*	I declare that this assignment is my own work in accordance with Humber Academic Policy.
-*	No part of this assignment has been copied manually or electronically from any other source
-*	(including web sites) or distributed to other students.
-*
-*	Name: Samip Vichare	 Student ID:N01545366	Date: 26/11/2023  	
-*
-*
-******************************************************************************
-**/
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
+const exphbs = require('express-handlebars');
+const movieService = require('./movieService');
+const db = require('./database');
+const helpers = require('./helpers');
+
 const app = express();
-const database = require('./config/database');
-const Invoice = require('./models/invoice');
+const PORT = process.env.PORT || 3000;
 
-const port = process.env.PORT || 8000;
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
-
-mongoose.connect(database.url);
-
-// Show all invoice-info
-app.get('/api/invoices', (req, res) => {
-    Invoice.find()
-        .then(invoices => res.json(invoices))
-        .catch(err => res.status(500).send(err));
+const hbs = exphbs.create({
+  //handlebars: customHelpers,
+  extname: '.hbs', 
+  //partialsDir: path.join(__dirname, 'views/partials'),
 });
 
+//hbs.handlebars.registerPartial('header', fs.readFileSync(path.join(__dirname, 'views/partials/header.hbs'), 'utf8'));
+//hbs.handlebars.registerPartial('footer', fs.readFileSync(path.join(__dirname, 'views/partials/footer.hbs'), 'utf8'));
 
-// Show a specific invoice based on the _id or InvoiceID
-app.get('/api/invoices/:invoice_id', (req, res) => {
-    const id = req.params.invoice_id;
-    Invoice.findOne({ $or: [{ _id: id }, { InvoiceID: id }] })
-        .then(invoice => {
-            if (!invoice) {
-                return res.status(404).json({ message: 'Invoice not found' });
-            }
-            res.json(invoice);
-        })
-        .catch(err => res.status(500).send(err));
-});
+app.engine('hbs', hbs.engine);
+app.set('view engine', 'hbs');
 
-// Insert a new invoice
-app.post('/api/invoices', function(req, res) {
-    const newInvoice = {
-        "Invoice ID": req.body["Invoice ID"],
-        Branch: req.body.Branch,
-        City: req.body.City,
-        "Customer type": req.body["Customer type"],
-        "Product line": req.body["Product line"],
-        name: req.body.name,
-        image: req.body.image,
-        "Unit price": req.body["Unit price"],
-        Quantity: req.body.Quantity,
-        "Tax 5%": req.body["Tax 5%"],
-        Total: req.body.Total,
-        Date: req.body.Date,
-        Time: req.body.Time,
-        Payment: req.body.Payment,
-        cogs: req.body.cogs,
-        "gross income": req.body["gross income"],
-        Rating: req.body.Rating
-    };
+app.engine(
+  'hbs',
+  exphbs.engine({
+  
+    extname: '.hbs',
+    runtimeOptions: {
+      allowProtoPropertiesByDefault: true,
+      allowProtoMethodsByDefault: true,
+    },
+    //handlebars: customHelpers
+  })
+);
+app.set('view engine', 'hbs');
 
-    console.log('Created new invoice');
-    
-    Invoice.create(newInvoice)
-    .then(() => Invoice.find())
-    .then(invoices => {
-        console.log('Data added to the database:');
-        res.json(newInvoice); // Showing the invoice data which is just inserted
-    })   
-    .catch(err => {
-        console.error('Error adding data to the database:', err);
-        res.status(500).send(err);
+// Replace this with your actual MongoDB connection string
+const connectionString = "mongodb+srv://vicharesamip:admin@admin.2e0txqd.mongodb.net/sample_mflix";
+
+// Use a promise to start the server after the connection is established
+db.initialize(connectionString)
+  .then(() => {
+    // Continue with your routes and server setup
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+
+    app.get('/search', (req, res) => {
+      res.render('searchForm');
     });
-});
 
+    app.post('/search', async (req, res) => {
+      try {
+        const page = parseInt(req.body.page) || 1;
+        const perPage = parseInt(req.body.perPage) || 10;
+        const title = req.body.title || '';
 
-// Update "Customer type" & "unit price" of an existing invoice
-app.put('/api/invoices/:invoice_id', async (req, res) => {
-    try {
-        const id = req.params.invoice_id;
-        const { CustomerType, UnitPrice, Quantity } = req.body;
+        const movies = await movieService.getAllMovies(page, perPage, title);
 
-        if (!CustomerType || !UnitPrice) {
-            return res.status(400).json({ error: 'Customer type and unit price are required fields.' });
-        }
+        res.render('searchResults', { movies });
+      } catch (error) {
+        console.error('Error getting Movies:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
 
-        // Adjusting for properties with spaces in the database
-        const data = {
-            "Customer type": CustomerType,
-            "Unit Price": UnitPrice,
-            "Total": UnitPrice * (Quantity || 1),
-        };
-
-        const invoice = await Invoice.findByIdAndUpdate(id, data, { new: true });
-
-        if (!invoice) {
-            return res.status(404).json({ error: 'Invoice not found' });
-        }
-
-        res.send('Successfully! Invoice updated - ' + invoice.Name);
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-
-// Delete an existing invoice based on the _id or InvoiceID
-app.delete('/api/invoices/:invoice_id', (req, res) => {
-    const id = req.params.invoice_id;
-
-    Invoice.findOneAndDelete({ $or: [{ _id: id }, { InvoiceID: id }] })
-        .then(invoice => {
-            if (!invoice) {
-                return res.status(404).json({ message: 'Invoice not found' });
-            }
-            res.send('Successfully! Invoice has been Deleted.');
-        })
-        .catch(err => res.status(500).send(err));
-});
-
-app.listen(port, () => {
-    console.log("App listening on port: " + port);
-});
+    // Start the server
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to connect to MongoDB. Check your connection string.');
+  });

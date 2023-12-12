@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <style>
+        
+        h1 {
+            text-align: center;
+            margin: 20px;
+            font-size: large;
+        }
+        div {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px auto; 
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h2 {
+            color: blue;
+        }
+        img {
+            width: 100%;
+            height: auto;
+            margin-top: 10px;
+        }
+        
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin-right: 10px;
+        }
+        nav a {
+            text-decoration: none;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    
+
+    <!-- Search Results Section -->
+    <h1>Search Results</h1>
+
+    {{#each movies}}
+        <div>
+            <h2>{{title}}</h2>
+            <p><strong>Plot:</strong> {{plot}}</p>
+            <p><strong>Genres:</strong> {{#each genres}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+            <p><strong>Runtime:</strong> {{runtime}} minutes</p>
+            <p><strong>Directors:</strong> {{#each directors}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+            <p><strong>IMDb Rating:</strong> {{imdb.rating}} ({{imdb.votes}} votes)</p>
+            <p><strong>Cast:</strong> {{#each cast}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+            <p><strong>Released:</strong> {{released.$date}}</p>
+            <p><strong>Languages:</strong> {{#each languages}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+            <p><strong>Rated:</strong> {{rated}}</p>
+            <p><strong>Awards:</strong> {{awards.text}}</p>
+            <p><strong>Year:</strong> {{year}}</p>
+            <p><strong>Countries:</strong> {{#each countries}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+            <p><strong>Tomatoes Rating:</strong> {{tomatoes.viewer.rating}}</p>
+            <img src="{{poster}}" alt="{{title}} Poster">
+        </div>
+    {{/each}}
+
+</body>
+</html>
